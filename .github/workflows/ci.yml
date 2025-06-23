@@ -1,0 +1,65 @@
+# This is a placeholder for the CI workflow file.
+# Content will be added in the next step.
+name: Backend CI
+
+on:
+  push:
+    branches: [ main, master, develop ] # Adjust as needed
+  pull_request:
+    branches: [ main, master, develop ] # Adjust as needed
+
+jobs:
+  test_backend:
+    runs-on: ubuntu-latest # Use a standard Linux runner
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.9' # Match Dockerfile/dev environment
+
+    - name: Install OS Dependencies (for Shapely, psycopg2 if not using Docker for tests)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgeos-dev libpq-dev
+        # Add other OS deps if necessary, e.g., for SpatiaLite if tests were to use it directly
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r backend/requirements.txt
+      working-directory: ./backend
+      # Or simply: pip install -r backend/requirements.txt if run from root
+
+    - name: Run backend tests
+      run: |
+        # Ensure PYTHONPATH allows finding 'app' module from 'backend/tests'
+        # The command used in local testing was:
+        # PYTHONPATH=. TESTING=true python -m pytest tests -v -s
+        # In CI, from the root, it would be:
+        PYTHONPATH=backend TESTING=true python -m pytest backend/tests -v -s
+      # working-directory: ./backend # Alternative: cd backend && PYTHONPATH=. TESTING=true python -m pytest tests -v -s
+      env:
+        TESTING: "true"
+        # DATABASE_URL: For tests, conftest.py sets up an in-memory SQLite, so this isn't strictly needed here
+        # if tests were to hit a real DB service in CI, this would be configured:
+        # DATABASE_URL: "sqlite:///./test_ci_db.db" # Or point to a service DB if using services in CI job
+
+    # Optional: Linting step
+    # - name: Lint with Flake8 (or other linter)
+    #   run: |
+    #     pip install flake8
+    #     flake8 backend/app backend/tests --count --select=E9,F63,F7,F82 --show-source --statistics
+    #     # Adjust flake8 command as needed
+
+    # Optional: Docker build check (if not running tests inside Docker)
+    # - name: Build backend Docker image
+    #   run: docker build -t myapp-backend-ci ./backend
+
+    # Note: If tests were run *inside* a Docker container (e.g., using docker-compose in CI),
+    # the OS dependency installation and Python setup would be handled by the Dockerfile.
+    # The current setup runs tests directly on the GitHub Actions runner.
+```

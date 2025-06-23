@@ -1,0 +1,8 @@
+/* This is the style.css file for custom frontend styles. */
+body {
+    padding-top: 60px;
+}
+.map-container {
+    height: 400px;
+    margin-bottom: 20px;
+}
