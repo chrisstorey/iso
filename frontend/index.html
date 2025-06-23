@@ -1,0 +1,248 @@
+<!-- This is the index.html file for the frontend. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open Referral UK Service Finder</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+        <a class="navbar-brand" href="#">Service Finder</a>
+    </nav>
+
+    <main role="main" class="container">
+        <div class="starter-template">
+            <h1>Open Referral UK Service Finder</h1>
+            <p class="lead">Find and manage community services.</p>
+        </div>
+
+        <!-- Claimant Selector for US6 -->
+        <div class="form-group">
+            <label for="claimant-select">Select Claimant to View Travel Area & Services:</label>
+            <select class="form-control" id="claimant-select">
+                <option value="">-- Select a Claimant --</option>
+            </select>
+        </div>
+
+        <!-- Map container -->
+        <div id="mapid" class="map-container"></div>
+
+        <!-- Service List and Filters -->
+        <div class="row">
+            <div class="col-md-4">
+                <h2>Filters</h2>
+                <form id="filter-form">
+                    <div class="form-group">
+                        <label for="filter-category">Category</label>
+                        <input type="text" class="form-control" id="filter-category" placeholder="e.g., Health, Education">
+                    </div>
+                    <div class="form-group">
+                        <label for="filter-fees">Fees (keywords)</label>
+                        <input type="text" class="form-control" id="filter-fees" placeholder="e.g., Free, Low Cost">
+                    </div>
+                    <!-- Placeholder for location filter inputs -->
+                    <!--
+                    <div class="form-group">
+                        <label for="filter-location">Location (e.g. Postcode or near Lat/Lon)</label>
+                        <input type="text" class="form-control" id="filter-location" placeholder="Future feature">
+                    </div>
+                    -->
+                    <button type="submit" class="btn btn-info btn-block">Apply Filters</button>
+                    <button type="button" class="btn btn-secondary btn-block mt-2" id="clear-filters">Clear Filters</button>
+                </form>
+            </div>
+            <div class="col-md-8">
+                <h2>Services</h2>
+                <div id="service-list">
+                    <!-- Service cards will be injected here by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+         <!-- Claimants Section -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <h2>Claimants</h2>
+                <div id="claimant-list">
+                    <!-- Claimant info will be injected here -->
+                </div>
+                 <!-- Add Claimant Form -->
+                <h3>Add New Claimant</h3>
+                <form id="add-claimant-form">
+                    <div class="form-group">
+                        <label for="claimant-name">Name</label>
+                        <input type="text" class="form-control" id="claimant-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="claimant-lat">Home Latitude</label>
+                        <input type="number" step="any" class="form-control" id="claimant-lat" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="claimant-lon">Home Longitude</label>
+                        <input type="number" step="any" class="form-control" id="claimant-lon" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Claimant</button>
+                </form>
+            </div>
+        </div>
+
+
+    </main><!-- /.container -->
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="js/app.js"></script>
+
+    <!-- Add Service Section -->
+    <div class="container mt-4 mb-4">
+        <hr>
+        <h2>Add New Service</h2>
+        <form id="add-service-form">
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="service-name">Service Name *</label>
+                    <input type="text" class="form-control" id="service-name" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="service-category">Category</label>
+                    <input type="text" class="form-control" id="service-category" placeholder="e.g., Health, Advice">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="service-description">Description</label>
+                <textarea class="form-control" id="service-description" rows="3"></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="service-url">Website URL</label>
+                    <input type="url" class="form-control" id="service-url" placeholder="https://example.com">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="service-email">Email</label>
+                    <input type="email" class="form-control" id="service-email" placeholder="contact@example.com">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="service-fees">Fees</label>
+                    <input type="text" class="form-control" id="service-fees" placeholder="e.g., Free, £10 per session">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="service-latitude">Latitude</label>
+                    <input type="number" step="any" class="form-control" id="service-latitude" placeholder="e.g., 51.5074">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="service-longitude">Longitude</label>
+                    <input type="number" step="any" class="form-control" id="service-longitude" placeholder="e.g., -0.1278">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success">Add Service</button>
+        </form>
+    </div>
+
+    <!-- Edit Service Modal -->
+    <div class="modal fade" id="editServiceModal" tabindex="-1" role="dialog" aria-labelledby="editServiceModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editServiceModalLabel">Edit Service</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-service-form">
+                        <input type="hidden" id="edit-service-id">
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="edit-service-name">Service Name *</label>
+                                <input type="text" class="form-control" id="edit-service-name" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="edit-service-category">Category</label>
+                                <input type="text" class="form-control" id="edit-service-category">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-service-description">Description</label>
+                            <textarea class="form-control" id="edit-service-description" rows="3"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="edit-service-url">Website URL</label>
+                                <input type="url" class="form-control" id="edit-service-url">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="edit-service-email">Email</label>
+                                <input type="email" class="form-control" id="edit-service-email">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                             <div class="form-group col-md-6">
+                                <label for="edit-service-fees">Fees</label>
+                                <input type="text" class="form-control" id="edit-service-fees">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="edit-service-latitude">Latitude</label>
+                                <input type="number" step="any" class="form-control" id="edit-service-latitude">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="edit-service-longitude">Longitude</label>
+                                <input type="number" step="any" class="form-control" id="edit-service-longitude">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Claimant Modal -->
+    <div class="modal fade" id="editClaimantModal" tabindex="-1" role="dialog" aria-labelledby="editClaimantModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editClaimantModalLabel">Edit Claimant</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-claimant-form">
+                        <input type="hidden" id="edit-claimant-id">
+                        <div class="form-group">
+                            <label for="edit-claimant-name">Name *</label>
+                            <input type="text" class="form-control" id="edit-claimant-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-claimant-lat">Home Latitude *</label>
+                            <input type="number" step="any" class="form-control" id="edit-claimant-lat" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-claimant-lon">Home Longitude *</label>
+                            <input type="number" step="any" class="form-control" id="edit-claimant-lon" required>
+                        </div>
+                        <!-- Add field for travel radius if we want to allow updating it -->
+                        <!-- <div class="form-group">
+                            <label for="edit-claimant-radius">Travel Radius (miles)</label>
+                            <input type="number" step="any" class="form-control" id="edit-claimant-radius" placeholder="e.g., 5">
+                        </div> -->
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
