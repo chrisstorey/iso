@@ -1,0 +1,97 @@
+Detailed Application Outline: Open Referral UK Service Finder
+This document provides a comprehensive outline for a web application that allows users to find and manage community services based on the Open Referral UK (ORUK) standard. It includes a FastAPI backend, a Bootstrap frontend, claimant management with location-based filtering, and interactive mapping.
+1. Overall Approach & Architecture
+We will build a full-stack application with a decoupled frontend and backend.
+Backend (FastAPI): A Python-based API will handle all business logic, data processing, and database interactions. It will expose RESTful endpoints for the frontend to consume.
+Frontend (Bootstrap & JavaScript): A responsive user interface built with standard HTML, CSS, and JavaScript, using the Bootstrap framework for styling and layout. This will communicate with the backend via HTTP requests.
+Database (PostGIS/SQLite with SpatiaLite): A SQL database will store the application data. Using a spatially-enabled database like PostgreSQL with PostGIS is crucial for handling GeoJSON data and performing efficient spatial queries.
+Mapping (Leaflet.js): A lightweight and powerful JavaScript library for creating interactive maps to visualize service locations and claimant travel areas.
+2. User Stories
+Here are some user stories to guide development, based on potential user roles.
+As a Case Worker, I want to:
+US1: View a list of all available services so that I can see what is on offer.
+US2: Filter services by category, location, and cost, so that I can find suitable options for my claimants.
+US3: View service locations on a map to understand their geographical distribution.
+US4: Add new claimants to the system, including their name and home location (as a latitude/longitude pair).
+US5: Define a travel extent for a claimant (e.g., a 5-mile radius from their home) to see what services are accessible to them.
+US6: See a claimant's travel area visualized on the map, along with all the services that fall within that area.
+As an Administrator, I want to:
+US7: Add new services to the directory, ensuring all required Open Referral UK fields are completed.
+US8: Edit or update existing service information to keep the directory accurate.
+US9: Remove services that are no longer available.
+US10: View and manage the list of all claimants in the system.
+As a Developer/DevOps Engineer, I want to:
+DEV1: Have a comprehensive suite of unit and integration tests for the backend API to ensure code quality and prevent regressions.
+DEV2: Have a Dockerfile for the backend application and a docker-compose.yml file to easily set up the entire application stack (backend, database) for local development and testing.
+DEV3: Have a simple build script that packages the frontend and backend assets for deployment.
+DEV4: Have a Continuous Integration (CI) pipeline that automatically runs tests on every push or pull request to the main branch.
+3. Project Structure
+This structure accommodates both the frontend and backend components.
+/openserver_fullstack
+|-- /backend
+|   |-- /app
+|   |   |-- __init__.py
+|   |   |-- main.py
+|   |   |-- models.py
+|   |   |-- schemas.py
+|   |   |-- crud.py
+|   |   |-- database.py
+|   |-- /tests
+|   |   |-- test_services.py
+|   |   |-- test_claimants.py
+|   |-- Dockerfile
+|   |-- requirements.txt
+|-- /frontend
+|   |-- /css
+|   |-- /js
+|   |-- index.html
+|-- docker-compose.yml
+|-- build.sh
+|-- .env
+
+
+4. Data Models & Schemas
+We will expand on the previous Service model and add one for Claimant.
+schemas.py (Pydantic):
+Service Schema: Based on the ORUK standard.
+Claimant Schema:
+from pydantic import BaseModel
+from typing import Optional, Dict
+
+class Claimant(BaseModel):
+    id: int
+    name: str
+    home_latitude: float
+    home_longitude: float
+    travel_extent_geojson: Optional[Dict] = None # To store GeoJSON polygon/circle
+
+    class Config:
+        orm_mode = True
+
+
+models.py (SQLAlchemy):
+Service Model: A table to store service data. Will include a Geometry field for the service's location.
+Claimant Model: A table for claimants. The travel_extent_geojson will be stored in a Geometry type field provided by GeoAlchemy2.
+5. Backend API Endpoints (main.py)
+Services:
+POST /services/: Create a service.
+GET /services/: Get a list of services. Will support query parameters for filtering (e.g., /services/?category=Health).
+GET /services/{service_id}: Get a single service.
+Claimants:
+POST /claimants/: Create a claimant. The request will include the claimant's name and home location as a latitude/longitude pair. The backend will generate the travel_extent_geojson based on a default radius.
+GET /claimants/: Get a list of all claimants.
+GET /claimants/{claimant_id}: Get a single claimant.
+Spatial Queries:
+GET /services/within/: An endpoint that accepts a claimant's ID and returns all services that are geographically within that claimant's travel_extent_geojson.
+6. Frontend Components (index.html & app.js)
+Main Layout: A two-column layout using Bootstrap's grid system.
+Filtering Controls: A form with dropdowns, text inputs, and sliders to filter services.
+Results List: A dynamically updated list of cards for services.
+Map Display:
+Leaflet map showing service locations as markers.
+When a claimant is selected, their travel_extent_geojson will be drawn as a layer on the map.
+JavaScript Logic (app.js):
+Fetch data from the FastAPI backend.
+Dynamically generate HTML for results.
+Update the map with markers and layers.
+Handle user interactions to trigger API calls and UI updates.
