@@ -1,0 +1,16 @@
+# This is the requirements.txt file for the backend application.
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary # For PostgreSQL
+# If using SQLite for local testing or simple deployments, you might use:
+# sqlalchemy[aiosqlite] # For async SQLite with FastAPI, or just rely on Python's built-in sqlite3 for sync
+geoalchemy2
+pydantic[email]
+
+# Testing
+pytest
+httpx # For sending requests to the FastAPI app in tests
+
+# Geometry operations
+shapely
