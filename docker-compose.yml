@@ -14,7 +14,7 @@ services:
       - db
 
   db:
-    image: postgis/postgis:13-3.1
+    image: postgis/postgis:14-3.1
     ports:
       - "5432:5432"
     environment:
